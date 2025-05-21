@@ -26,3 +26,7 @@ INSERT INTO Compras (ClienteID, NomeLivro) VALUES
 (2, 'O Pequeno Príncipe');
 
 SELECT * FROM Clientes;
+
+SELECT Clientes.nomeCliente, Compras.NomeLivro
+FROM Compras
+INNER JOIN Clientes ON Compras.ClienteID = Clientes.ID;
