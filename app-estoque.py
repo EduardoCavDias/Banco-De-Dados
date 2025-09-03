@@ -5,7 +5,6 @@ import os         # Verificação e remoção de arquivos
 
 # 🧱 Define a classe Produto com atributos e métodos
 class Produto:
-    # Método inicializa o objeto Produto com seus atributos
     def __init__(self, id, nome, categoria, quantidade, preco, fornecedor):
         self.id = id
         self.nome = nome
@@ -14,7 +13,6 @@ class Produto:
         self.preco = preco
         self.fornecedor = fornecedor
 
-    # Método converte o objeto Produto em dicionário (usado para exportação em JSON)
     def to_dict(self):
         return {
             "id": self.id,
@@ -25,20 +23,19 @@ class Produto:
             "fornecedor": self.fornecedor
         }
 
-    # Método define a representação em string do objeto (usado ao imprimir)
     def __str__(self):
         return (f"{self.id} - {self.nome} ({self.categoria}) | "
                 f"Qtd: {self.quantidade} | R${self.preco:.2f} | "
                 f"Fornecedor: {self.fornecedor}")
 
-# 🛒 Cria uma lista inicial de produtos
+# 🛒 Lista inicial de produtos
 produtos = [
-    Produto(1, "Caneta", "Papelaria", 100, 2.50, "OfficeMax"),
+    Produto(1, "Caneta Azul", "Papelaria", 100, 2.50, "OfficeMax"),
     Produto(2, "Caderno", "Papelaria", 50, 15.90, "Faber"),
     Produto(3, "Borracha", "Papelaria", 200, 1.20, "Mercur")
 ]
 
-# ➕ Adiciona novos produtos usando .append()
+# ➕ Novos produtos com .append()
 produtos.append(Produto(4, "Mouse Gamer", "Informática", 30, 120.00, "Logitech"))
 produtos.append(Produto(5, "Mochila", "Acessórios", 20, 89.90, "Dell"))
 
@@ -49,6 +46,14 @@ def listar_produtos_acima_de_10():
         if p.preco > 10:
             print(p)
 
+# 📌 Função para alterar o preço de um produto existente
+def alterar_preco(nome, novo_preco):
+    for p in produtos:
+        if p.nome == nome:
+            p.preco = novo_preco
+            return f"✅ Preço do produto '{nome}' atualizado para R${novo_preco:.2f}"
+    return f"❌ Produto '{nome}' não encontrado."
+
 # 🧬 Serializa os produtos para JSON e exibe no terminal
 json_produtos = json.dumps([p.to_dict() for p in produtos], indent=4)
 print("📦 Produtos em JSON:")
@@ -58,11 +63,11 @@ print(json_produtos)
 if os.path.exists("produtos.db"):
     os.remove("produtos.db")
 
-# 🔌 Conecta ao banco de dados SQLite (cria o arquivo automaticamente)
+# 🔌 Conecta ao banco de dados SQLite
 conn = sqlite3.connect("produtos.db")
 cursor = conn.cursor()
 
-# 🧱 Cria a tabela 'produtos' com os campos correspondentes à classe Produto
+# 🧱 Cria a tabela 'produtos'
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS produtos (
     id INTEGER PRIMARY KEY,
@@ -74,7 +79,7 @@ CREATE TABLE IF NOT EXISTS produtos (
 )
 """)
 
-# 📥 Insere os produtos na tabela (substitui se o ID já existir)
+# 📥 Insere os produtos no banco
 for p in produtos:
     cursor.execute("""
         INSERT OR REPLACE INTO produtos 
@@ -82,20 +87,19 @@ for p in produtos:
         VALUES (?, ?, ?, ?, ?, ?)
     """, (p.id, p.nome, p.categoria, p.quantidade, p.preco, p.fornecedor))
 
-# 💾 Salva as alterações no banco
 conn.commit()
 
-# 🔍 Consulta todos os produtos e exibe no terminal
+# 🔍 Consulta os produtos do banco
 print("\n📊 Produtos no banco de dados:")
 cursor.execute("SELECT * FROM produtos")
-
-# 🔄 Reconstrói os objetos Produto a partir dos dados do banco
 for row in cursor.fetchall():
-    produto = Produto(*row)  # Desempacota os dados diretamente nos atributos
+    produto = Produto(*row)
     print(produto)
 
-# 🔒 Encerra a conexão com o banco
 conn.close()
 
-# 🧪 Testa a função criada
+# 📌 Testes das novas funções
+listar_produtos_acima_de_10()
+print(alterar_preco("Caneta Azul", 3.00))
+
 listar_produtos_acima_de_10()
